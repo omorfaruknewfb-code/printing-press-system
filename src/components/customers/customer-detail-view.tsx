@@ -33,7 +33,7 @@ interface OrderRow {
   totalBill: number;
   advance: number;
   due: number;
-  status: "PENDING" | "DELIVERED" | "REJECT";
+  status: "PENDING" | "CONFIRMED" | "READY_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
 }
 
 interface PaymentRow {

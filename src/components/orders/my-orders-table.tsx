@@ -24,7 +24,7 @@ interface PlainOrder {
   due: number;
   totalCosting: number;
   costingSet: boolean;
-  status: "PENDING" | "DELIVERED" | "REJECT";
+  status: "PENDING" | "CONFIRMED" | "READY_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
 }
 
 function formatMoney(value: number) {
