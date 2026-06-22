@@ -59,9 +59,10 @@ export function LoginForm() {
           </div>
         </div>
       )}
-      <Card className="bg-white/5 backdrop-blur-xl border-emerald-500/20 rounded-2xl shadow-2xl shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-shadow duration-300">
+      <Card className="w-full max-w-md bg-white/95 backdrop-blur-xl border-gray-200 shadow-2xl shadow-black/10">
         <CardHeader>
-          <p className="text-sm font-medium text-emerald-100">Sign in</p>
+          <p className="text-2xl font-bold text-gray-900">Sign In</p>
+          <p className="text-gray-600">Enter your credentials to access the system</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -72,25 +73,25 @@ export function LoginForm() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-emerald-100">Email</Label>
+              <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="you@alihsan.com"
                 autoComplete="email"
-                className="bg-white/5 border-emerald-500/20 text-white placeholder:text-gray-500"
+                className="bg-white border-gray-300 focus:border-emerald-500 focus:ring-emerald-500/20 text-gray-900"
                 {...register("email")}
               />
               {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-emerald-100">Password</Label>
+              <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
               <PasswordInput
                 id="password"
                 placeholder="••••••••"
                 autoComplete="current-password"
-                className="bg-white/5 border-emerald-500/20 text-white placeholder:text-gray-500"
+                className="bg-white border-gray-300 focus:border-emerald-500 focus:ring-emerald-500/20 text-gray-900"
                 {...register("password")}
               />
               {errors.password && (
@@ -98,16 +99,16 @@ export function LoginForm() {
               )}
             </div>
 
-            <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-semibold rounded-lg" disabled={isSubmitting}>
+            <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Sign In
             </Button>
           </form>
         </CardContent>
         <CardFooter>
-          <p className="w-full text-center text-sm text-gray-400">
+          <p className="w-full text-center text-sm text-gray-600">
             Forgot your password?{" "}
-            <a href="/forgot-password" className="font-medium text-emerald-400 hover:underline">
+            <a href="/forgot-password" className="text-emerald-600 hover:text-emerald-700 text-sm font-medium">
               Reset it
             </a>
           </p>
