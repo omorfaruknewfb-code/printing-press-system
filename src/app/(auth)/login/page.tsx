@@ -6,11 +6,10 @@ export default async function LoginPage() {
 
   return (
     <>
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-emerald-950 via-green-900 to-teal-950">
-        <div className="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMzAgMTVjLTggMC0xNSA3LTE1IDE1czcgMTUgMTUgMTUgMTUtNyAxNS0xNS03LTE1LTE1LTE1eiIgZmlsbD0icmdiYSgyMSwxMjgsMTEyLDAuMDcpIi8+PC9zdmc+')] bg-repeat"></div>
+      <div className="fixed inset-0 z-0 bg-gradient-to-br from-emerald-950 via-green-900 to-teal-950">
+        <div className="absolute inset-0 opacity-15 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMzAgMTVjLTggMC0xNSA3LTE1IDE1czcgMTUgMTUgMTUgMTUtNyAxNS0xNS03LTE1LTE1LTE1eiIgZmlsbD0icmdiYSgyMSwxMjgsMTEyLDAuMDUpIi8+PC9zdmc+')]"></div>
       </div>
-
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+      <main className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-sm sm:max-w-md">
           <div className="mb-8 flex flex-col items-center text-center">
             {settings.logoUrl && (
@@ -26,7 +25,7 @@ export default async function LoginPage() {
           </div>
           <LoginForm />
         </div>
-      </div>
+      </main>
     </>
   );
 }

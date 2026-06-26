@@ -109,6 +109,9 @@ model Order {
   due            Decimal     @default(0) @db.Decimal(12, 2)
   totalCosting   Decimal     @default(0) @map("total_costing") @db.Decimal(12, 2)
   costingSet     Boolean     @default(false) @map("costing_set")
+  discountAmount Decimal     @default(0) @map("discount_amount") @db.Decimal(12, 2)
+  discountType   String?     @map("discount_type") // "PERCENTAGE" or "FIXED"
+  adjustmentAmount Decimal   @default(0) @map("adjustment_amount") @db.Decimal(12, 2)
   deliveryDate   DateTime    @map("delivery_date")
   status         OrderStatus @default(PENDING)
   orderTakenById String      @map("order_taken_by_user_id")

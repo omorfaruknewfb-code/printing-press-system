@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPendingOrders } from "@/lib/orders-data";
+import { getUsers } from "@/lib/users-data";
 import { PendingWorksTable } from "@/components/orders/pending-works-table";
 
 export default async function PendingWorksPage() {
@@ -14,19 +15,23 @@ export default async function PendingWorksPage() {
   // All Pending orders are visible to every Staff member (not just the
   // person who took the order) — anyone may hand over finished work.
   const orders = await getPendingOrders();
+  const staffOptions = role === "ADMIN" ? await getUsers() : [];
 
   const plainOrders = orders.map((o) => {
     const base = {
       id: o.id,
       orderId: o.orderId,
       customerName: o.customer.name,
-      items: o.items.map((i) => ({ itemName: i.itemName, quantity: i.quantity })),
+      customerMobile: o.customer.mobile,
+      items: o.items.map((i) => ({ itemName: i.itemName, quantity: i.quantity, description: i.description || "", unitPrice: Number(i.unitPrice) })),
       deliveryDate: o.deliveryDate.toISOString().slice(0, 10),
       status: o.status as "CONFIRMED" | "READY_FOR_DELIVERY",
       // Due is needed by every role to actually collect payment on
       // delivery, so it's always included even though Staff doesn't see
       // the other money fields (Total Bill / Advance / Costing).
       due: Number(o.due),
+      orderTakenByName: o.orderTakenBy.name,
+      assignedToId: o.assignedToId,
     };
 
     // Staff never receives these fields at all — not just hidden in the UI,
@@ -48,7 +53,7 @@ export default async function PendingWorksPage() {
         <p className="text-sm text-gray-500">{plainOrders.length} order(s) awaiting completion</p>
       </div>
 
-      <PendingWorksTable orders={plainOrders} role={role} />
+      <PendingWorksTable orders={plainOrders} role={role} staffOptions={staffOptions.map(s => ({ id: s.id, name: s.name, role: s.role }))} />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { Printer, ArrowLeft } from "lucide-react";
+import { Printer, ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
@@ -8,6 +8,7 @@ import { getOrderById } from "@/lib/orders-data";
 import { StatusBadge } from "@/components/orders/status-badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format-date";
+import { deleteOrder } from "@/actions/order-actions";
 
 interface PageProps {
   params: { id: string };
@@ -52,6 +53,27 @@ export default async function OrderDetailPage({ params }: PageProps) {
         </div>
         <div className="flex items-center gap-2">
           <StatusBadge status={order.status} />
+          {session?.user.role === "ADMIN" && (
+            <>
+              <Link href={`/orders/${order.id}/edit`}>
+                <Button size="sm" variant="outline">
+                  <Pencil className="mr-2 h-4 w-4" /> Edit
+                </Button>
+              </Link>
+              <form action={async () => {
+                "use server";
+                const result = await deleteOrder(order.id);
+                if (!result.success) {
+                  redirect(`/orders/${order.id}?error=${encodeURIComponent(result.error)}`);
+                }
+                redirect("/orders");
+              }}>
+                <Button type="submit" size="sm" variant="destructive">
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </Button>
+              </form>
+            </>
+          )}
           <Button asChild size="sm" variant="outline">
             <Link href={`/orders/${order.id}/print`} target="_blank">
               <Printer className="mr-2 h-4 w-4" /> ডেলিভারি স্লিপ
