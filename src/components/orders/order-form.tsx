@@ -94,8 +94,28 @@ export function OrderForm({
   const [assignedToName, setAssignedToName] = useState(
     staffOptions.find((s) => s.id === initialValues?.assignedToId)?.name ?? ""
   );
+  const [discountAmount, setDiscountAmount] = useState(String(initialValues?.discountAmount ?? ""));
+  const [discountType, setDiscountType] = useState<"PERCENTAGE" | "FIXED" | "">(initialValues?.discountType ?? "");
+  const [adjustmentAmount, setAdjustmentAmount] = useState(String(initialValues?.adjustmentAmount ?? ""));
 
-  const totalBill = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+  const itemsTotal = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+  let totalBill = itemsTotal;
+  
+  // Apply discount
+  if (discountAmount && discountType) {
+    if (discountType === "PERCENTAGE") {
+      totalBill = totalBill - (totalBill * Number(discountAmount) / 100);
+    } else {
+      totalBill = totalBill - Number(discountAmount);
+    }
+  }
+  
+  // Apply adjustment
+  if (adjustmentAmount) {
+    totalBill = totalBill + Number(adjustmentAmount);
+  }
+  
+  totalBill = Math.max(0, totalBill);
   const due = totalBill - (Number(advance) || 0);
 
   function fillCustomer(customer: CustomerHit) {
@@ -125,6 +145,11 @@ export function OrderForm({
       return;
     }
 
+    if (isSubmitting) {
+      setError("অনুগ্রহ করে অপেক্ষা করুন, অর্ডার প্রসেস হচ্ছে...");
+      return;
+    }
+
     setIsSubmitting(true);
 
     const payload: OrderInput = {
@@ -135,6 +160,9 @@ export function OrderForm({
       advance: Number(advance),
       totalCosting:
         role === "ADMIN" && totalCosting !== "" ? Number(totalCosting) : undefined,
+      discountAmount: discountAmount ? Number(discountAmount) : undefined,
+      discountType: discountType || undefined,
+      adjustmentAmount: adjustmentAmount ? Number(adjustmentAmount) : undefined,
       deliveryDate,
       assignedToId: assignedToId || null,
     };
@@ -308,6 +336,49 @@ export function OrderForm({
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Discount Section */}
+      <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        <h3 className="mb-3 text-sm font-semibold text-gray-700">ডিসকাউন্ট ও অ্যাডজাস্টমেন্ট</h3>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="space-y-2">
+            <Label htmlFor="discountType">ডিসকাউন্ট টাইপ</Label>
+            <select
+              id="discountType"
+              value={discountType}
+              onChange={(e) => setDiscountType(e.target.value as "PERCENTAGE" | "FIXED" | "")}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            >
+              <option value="">নেই</option>
+              <option value="PERCENTAGE">পারসেন্টেজ (%)</option>
+              <option value="FIXED">নির্দিষ্ট টাকা</option>
+            </select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="discountAmount">ডিসকাউন্ট পরিমাণ</Label>
+            <Input
+              id="discountAmount"
+              type="number"
+              min={0}
+              value={discountAmount}
+              onChange={(e) => setDiscountAmount(e.target.value)}
+              placeholder={discountType === "PERCENTAGE" ? "e.g. 10" : "e.g. 100"}
+              disabled={!discountType}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="adjustmentAmount">অ্যাডজাস্টমেন্ট (+/-)</Label>
+            <Input
+              id="adjustmentAmount"
+              type="number"
+              value={adjustmentAmount}
+              onChange={(e) => setAdjustmentAmount(e.target.value)}
+              placeholder="ব্যালেন্স অ্যাডজাস্ট করুন"
+            />
+            <p className="text-xs text-gray-500">পজিটিভ = যোগ, নেগেটিভ = বিয়োগ</p>
+          </div>
         </div>
       </div>
 

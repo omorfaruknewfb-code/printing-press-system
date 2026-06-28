@@ -38,7 +38,7 @@ export default async function EditOrderPage({ params }: PageProps) {
         initialValues={{
           customerName: order.customer.name,
           customerMobile: order.customer.mobile,
-          customerAddress: order.customer.address ?? "",
+          customerAddress: (order.customer as any).address ?? "",
           items: order.items.map(i => ({
             itemName: i.itemName,
             description: i.description ?? "",

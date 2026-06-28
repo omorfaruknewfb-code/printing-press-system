@@ -15,6 +15,9 @@ export const orderInputSchema = z.object({
   items: z.array(orderItemInputSchema).min(1, "Add at least one item"),
   advance: z.coerce.number().min(0, "Advance cannot be negative"),
   totalCosting: z.coerce.number().min(0).optional(),
+  discountAmount: z.coerce.number().min(0).optional(),
+  discountType: z.enum(["PERCENTAGE", "FIXED"]).optional(),
+  adjustmentAmount: z.coerce.number().optional(),
   deliveryDate: z.string().min(1, "Delivery date is required"),
   assignedToId: z.string().optional().nullable(),
 });

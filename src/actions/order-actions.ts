@@ -37,8 +37,26 @@ async function upsertItems(tx: Prisma.TransactionClient, itemNames: string[]) {
   }
 }
 
-function computeTotalBill(items: OrderInput["items"]) {
-  return items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+function computeTotalBill(items: OrderInput["items"], discountAmount?: number, discountType?: "PERCENTAGE" | "FIXED", adjustmentAmount?: number) {
+  const itemsTotal = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+  let finalTotal = itemsTotal;
+  
+  // Apply discount
+  if (discountAmount && discountType) {
+    if (discountType === "PERCENTAGE") {
+      finalTotal = finalTotal - (finalTotal * discountAmount / 100);
+    } else {
+      finalTotal = finalTotal - discountAmount;
+    }
+  }
+  
+  // Apply adjustment (can be positive or negative)
+  if (adjustmentAmount !== undefined && adjustmentAmount !== 0) {
+    finalTotal = finalTotal + adjustmentAmount;
+  }
+  
+  // Ensure total is not negative
+  return Math.max(0, finalTotal);
 }
 
 export async function createOrder(rawInput: OrderInput): Promise<ActionResult> {
@@ -50,7 +68,47 @@ export async function createOrder(rawInput: OrderInput): Promise<ActionResult> {
   }
   const input = parsed.data;
 
-  const totalBill = computeTotalBill(input.items);
+  // Prevent duplicate orders: Check if a similar order was created in the last 30 seconds
+  const recentOrder = await prisma.order.findFirst({
+    where: {
+      orderTakenById: user.id,
+      createdAt: {
+        gte: new Date(Date.now() - 30000), // Last 30 seconds
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (recentOrder) {
+    // Check if the recent order has similar customer and items
+    const recentItems = await prisma.orderItem.findMany({
+      where: { orderId: recentOrder.id },
+    });
+    const itemsMatch = input.items.every(inputItem =>
+      recentItems.some(
+        recentItem =>
+          recentItem.itemName === inputItem.itemName &&
+          recentItem.quantity === inputItem.quantity &&
+          Number(recentItem.unitPrice) === inputItem.unitPrice
+      )
+    ) &&
+    recentItems.length === input.items.length;
+
+    if (itemsMatch && recentOrder.customerId) {
+      const recentCustomer = await prisma.customer.findUnique({
+        where: { id: recentOrder.customerId },
+      });
+      if (
+        recentCustomer &&
+        recentCustomer.mobile === input.customerMobile &&
+        recentCustomer.name === input.customerName
+      ) {
+        return { success: false, error: "একটি অনুরূপ অর্ডার সাম্প্রতিকভাবে তৈরি হয়েছে। অনুগ্রহ করে কয়েক সেকেন্ড অপেক্ষা করুন।" };
+      }
+    }
+  }
+
+  const totalBill = computeTotalBill(input.items, input.discountAmount, input.discountType, input.adjustmentAmount);
   // Staff cannot set Total Costing at creation time — they can add it later
   // via updateOwnOrderCosting, scoped to only their own order (Security Rule 1).
   const totalCosting = user.role === "ADMIN" ? input.totalCosting ?? 0 : 0;
@@ -87,6 +145,9 @@ export async function createOrder(rawInput: OrderInput): Promise<ActionResult> {
           due,
           totalCosting,
           costingSet,
+          discountAmount: input.discountAmount ?? 0,
+          discountType: input.discountType ?? null,
+          adjustmentAmount: input.adjustmentAmount ?? 0,
           deliveryDate: new Date(input.deliveryDate),
           status: initialStatus,
           orderTakenById: user.id,
@@ -178,6 +239,9 @@ export async function updateOrder(orderDbId: string, rawInput: OrderInput): Prom
           due,
           totalCosting,
           costingSet: true,
+          discountAmount: input.discountAmount ?? 0,
+          discountType: input.discountType ?? null,
+          adjustmentAmount: input.adjustmentAmount ?? 0,
           deliveryDate: new Date(input.deliveryDate),
           assignedToId: input.assignedToId || null,
           items: {

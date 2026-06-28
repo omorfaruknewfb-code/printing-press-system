@@ -1,6 +1,8 @@
 import { getSettings } from "@/lib/settings-data";
 import { SettingsView } from "@/components/settings/settings-view";
 
+export const dynamic = 'force-dynamic';
+
 export default async function SettingsPage() {
   const settings = await getSettings();
 

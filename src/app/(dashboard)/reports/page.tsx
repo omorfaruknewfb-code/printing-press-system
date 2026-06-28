@@ -10,6 +10,8 @@ import {
 } from "@/lib/reports-data";
 import { ReportsView } from "@/components/reports/reports-view";
 
+export const dynamic = 'force-dynamic';
+
 export default async function ReportsPage() {
   const [monthly, daily, staffPerformance, topItems, topCustomers, profitSummary, cancelledSummary, cancelledOrders] =
     await Promise.all([
